@@ -16,7 +16,7 @@ export const signup = async (req, res) => {
       db.query(
         `SELECT * FROM users WHERE username='${username}' OR email='${email}'`,
         (error, results) => {
-          console.log(results)
+          console.log(results);
           if (results.length != 0)
             res.status(400).json({ message: "username is taken" });
           else {
@@ -30,11 +30,9 @@ export const signup = async (req, res) => {
                 else {
                   const accessToken = jwt.sign(req.body, process.env.SECRET);
                   res.status(200).json({
-                    userData: {
-                      username,
-                      email
-                    },
-                    accessToken: accessToken,
+                    username,
+                    email,
+                    accessToken,
                   });
                 }
               }
@@ -76,10 +74,8 @@ export const signin = async (req, res) => {
                         process.env.SECRET
                       );
                       res.status(200).json({
-                        userData: {
-                          username: results[0].username,
-                          email: results[0].email,
-                        },
+                        username: results[0].username,
+                        email: results[0].email,
                         accessToken: accessToken,
                       });
                     } else
