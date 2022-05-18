@@ -5,14 +5,18 @@ const saltRounds = 10;
 
 export const signup = async (req, res) => {
   const { username, password, email } = req.body;
-  if (!(username && password && email)) res.status(400);
-  else
-    try {
-      const hash = await bcrypt.hash(password, saltRounds);
+  //if (!(username && password && email)) {
+  //res.status(400);
+  //}
+  //else
+  try {
+    bcrypt.hash(password, saltRounds, (err, hash) => {
+      if (err) throw err;
+
       db.query(
-        `SELECT username FROM users WHERE username='${username}' OR email='${email}'`,
+        `SELECT * FROM users WHERE username='${username}' OR email='${email}'`,
         (error, results) => {
-          if (error) throw error;
+          console.log(results)
           if (results.length != 0)
             res.status(400).json({ message: "username is taken" });
           else {
@@ -23,15 +27,25 @@ export const signup = async (req, res) => {
                 `,
               (error, results) => {
                 if (error) throw error;
-                else res.status(201).json({ message: "account created" });
+                else {
+                  const accessToken = jwt.sign(req.body, process.env.SECRET);
+                  res.status(200).json({
+                    userData: {
+                      username,
+                      email
+                    },
+                    accessToken: accessToken,
+                  });
+                }
               }
             );
           }
         }
       );
-    } catch (error) {
-      res.status(500).json({ message: error });
-    }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
 };
 
 export const signin = async (req, res) => {
@@ -45,7 +59,7 @@ export const signin = async (req, res) => {
           if (results.length == 0)
             res.status(404).json({ message: "Password or login is incorrect" });
           else {
-            const hash = results[0].password;
+            //const hash = results[0].password;
             bcrypt.compare(password, hash, (err, correctPassword) => {
               if (!correctPassword)
                 res
@@ -61,15 +75,13 @@ export const signin = async (req, res) => {
                         results[0],
                         process.env.SECRET
                       );
-                      res
-                        .status(200)
-                        .json({
-                          userData: {
-                            username: results[0].username,
-                            email: results[0].email,
-                          },
-                          accessToken: accessToken,
-                        });
+                      res.status(200).json({
+                        userData: {
+                          username: results[0].username,
+                          email: results[0].email,
+                        },
+                        accessToken: accessToken,
+                      });
                     } else
                       res.status(404).json({ message: "Account not found" });
                   }

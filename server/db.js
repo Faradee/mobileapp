@@ -10,7 +10,7 @@ const db = mysql.createConnection({
   host: host,
   user: user,
   password: password,
-  database: "nodemysql",
+  database: process.env.DATABASE,
 });
 
 db.connect((err) => {
