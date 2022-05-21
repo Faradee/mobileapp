@@ -1,10 +1,11 @@
 import db from "../db.js";
 
 export const getPosts = async (req, res) => {
+  console.log("got posts")
   try {
     db.query(
       `
-            SELECT * FROM notes WHERE author='${req.body.login}';
+            SELECT * FROM notes WHERE author='${req.user.username}';
         `,
       (error, results) => {
         if (error) throw error;
@@ -12,32 +13,31 @@ export const getPosts = async (req, res) => {
       }
     );
   } catch (err) {
-    res.status(500).json({ message: "error" });
+    res.status(500).json({ message: "error" }); 
   }
 };
 
 export const addPost = async (req, res) => {
-  const { id, color, text } = req.body;
-  try {
+  const { color, text } = req.body; 
+  try { 
     db.query(
       `
-      INSERT INTO notes(id, color, text, date, author)
-      VALUES ('${id}','${color}','${text}', now(), '${req.username}');
+      INSERT INTO notes( color, text, date, author)
+      VALUES ('${color}','${text}', now(), '${req.user.username}'); 
       `,
       (error, result) => {
         if (error) throw error;
-        else res.status(200).json({ message: "post created successfully" });
+        else res.status(200).json({message: "post created successfully" });
       }
-    );
+    ); 
   } catch (error) {
     res.status(500).json({ message: "Error" });
   }
 };
 
 export const deletePost = async (req, res) => {
-  console.log(req.params);
+  console.log("deleting post"); 
   const { id } = req.params;
- 
   try {
     db.query(`SELECT id FROM notes WHERE id='${id}'`, (error, result) => {
       if (error) throw error;
@@ -51,7 +51,7 @@ export const deletePost = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log("poop");
+    console.log(error);
     res.status(500).json({ message: "Error" });
   }
 };

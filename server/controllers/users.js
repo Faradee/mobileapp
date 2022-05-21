@@ -16,7 +16,6 @@ export const signup = async (req, res) => {
       db.query(
         `SELECT * FROM users WHERE username='${username}' OR email='${email}'`,
         (error, results) => {
-          console.log(results);
           if (results.length != 0)
             res.status(400).json({ message: "username is taken" });
           else {
@@ -48,6 +47,7 @@ export const signup = async (req, res) => {
 
 export const signin = async (req, res) => {
   const { login, password } = req.body;
+  console.log("logged in")  
   try {
     bcrypt.hash(password, saltRounds, (err, hash) => {
       db.query(

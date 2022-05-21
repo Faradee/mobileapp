@@ -8,13 +8,12 @@ import cors from "cors";
 const app = express();
 
 const authenticateToken = (req, res, next) => {
-  console.log(req.headers);
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (token == null) return res.status(401);
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];  
+  if (token == null) return res.status(401).json({message: "no valid credentials"});
 
   jwt.verify(token, process.env.SECRET, (err, user) => {
-    if (err) return res.status(403); 
+    if (err) return res.status(403).json({message: "no valid credentials"}); 
     req.user = user;
     next();
   });
